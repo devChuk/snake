@@ -1,49 +1,53 @@
-/**
- *
- */
 'use strict';
 
 
 class Board {
     /**
-     * magic class
-     * @property {number} type Contains the resource record type
+     * Represents the game's coordinate grid
+     * @property {number} blockSize The size of a pixel in the grid
+     * @property {array} grid A two-dimensional array that represents the grid
      */
     constructor(canvasWidth, canvasHeight, blockSize) {
-        // figure out width and height of our grid
+        // Calculate the unit width and height of the grid to fill the canvas
         let gridWidth = Math.floor(canvasWidth / blockSize);
         let gridHeight = Math.floor(canvasHeight / blockSize);
         this.blockSize = blockSize;
-
         this.grid = new Array(gridWidth).fill(null);
         this.grid = this.grid.map(() => new Array(gridHeight).fill(null));
-        this.buildBoardWalls()
+        this.buildBoardWalls();
     }
 
     render(canvas) {
+        /**
+         * Renders the board grid onto a canvas. Note that non-wall blocks are removed
+         * @param {HTML5 Canvas} canvas The <canvas> element
+         */
         let ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         // fill the bottom and right black gaps of grid
-        ctx.fillStyle = "white";
+        ctx.fillStyle = 'white';
         ctx.fillRect(0, canvas.height - this.blockSize, canvas.width, this.blockSize);
         ctx.fillRect(canvas.width - this.blockSize, 0, this.blockSize, canvas.height);
 
+        // draw grid with appropriate color
         this.grid.forEach((arr, i) => {
             arr.forEach((block, j) => {
                 switch(block) {
-                    case 3:
-                        ctx.fillStyle = "#7AEE56";
+                    case FOOD_BLOCK:
+                        ctx.fillStyle = '#7AEE56';
                         break;
-                    case 4:
-                        ctx.fillStyle = "red";
+                    case DEAD_SNAKE_BLOCK:
+                        ctx.fillStyle = 'red';
                         break;
                     default:
-                        ctx.fillStyle = "white";
+                        ctx.fillStyle = 'white';
                         break;
                 }
                 if (block) {
-                    ctx.fillRect(i * this.blockSize, j * this.blockSize, this.blockSize, this.blockSize);
-                    if (block !== 1) {
+                    ctx.fillRect(i * this.blockSize, j * this.blockSize, this.blockSize,
+                        this.blockSize);
+
+                    if (block !== WALL_BLOCK) {
                         this.grid[i][j] = null;
                     }
                 }
@@ -52,6 +56,11 @@ class Board {
     }
 
     resize(canvas) {
+        /**
+         * Resize the game board to the new canvas size and rerenders it. The grid extends with
+         * empty grid space if the canvas is larger, and shortens if the canvas is smaller.
+         * @param {HTML5 Canvas} canvas The <canvas> element
+         */
         let gridWidth = Math.floor(canvas.width / this.blockSize);
         let gridHeight = Math.floor(canvas.height / this.blockSize);
         // clear bottom & right walls
@@ -79,16 +88,17 @@ class Board {
             return arr;
         });
 
-        this.buildBoardWalls()
+        this.buildBoardWalls();
         this.render(canvas);
     }
 
     buildBoardWalls() {
-        this.grid[0].fill(1);
-        this.grid[this.grid.length - 1].fill(1);
+        // Builds the four walls on the edges of the board grid.
+        this.grid[0].fill(WALL_BLOCK);
+        this.grid[this.grid.length - 1].fill(WALL_BLOCK);
         this.grid.forEach(arr => {
-            arr[0] = 1;
-            arr[arr.length - 1] = 1;
+            arr[0] = WALL_BLOCK;
+            arr[arr.length - 1] = WALL_BLOCK;
         });
     }
 }

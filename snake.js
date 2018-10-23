@@ -1,18 +1,15 @@
-/**
- *
- */
 'use strict';
 
 
-// const UP = 1;
-// const LEFT = 2;
-// const DOWN = 3;
-// const RIGHT = 4;
-
 class Snake {
     /**
-     * magic class
-     * @property {number} type Contains the resource record type
+     * Represents a snake
+     * @property {array} body An array of points the snake's body occupies
+     * @property {number} x_vel The horizontal velocity of the head
+     * @property {number} y_vel The vertical velocity of the head
+     * @property {boolean} growing Used to grow the snake by one body unit
+     * @property {boolean} dead True if the snake has collided with itself or a wall
+     * @property {boolean} full True if there is nothing else to eat. The snake is done eating.
      */
     constructor(x, y) {
         this.body = [{x, y}];
@@ -20,23 +17,41 @@ class Snake {
         this.y_vel = 0;
         this.growing = false;
         this.dead = false;
+        this.full = false;
     }
 
     drawOn(grid) {
         this.body.forEach(pt => {
-            grid[pt.x][pt.y] = 2;
+            if (pt.x < grid.length && pt.y < grid[0].length) {
+                grid[pt.x][pt.y] = SNAKE_BLOCK;
+            }
         });
         if (this.dead) {
-            grid[this.body[0].x][this.body[0].y] = 4;
+            const snakeHead = this.body[0];
+            if (snakeHead.x < grid.length && snakeHead.y < grid[0].length) {
+                grid[snakeHead.x][snakeHead.y] = DEAD_SNAKE_BLOCK;
+            }
         }
     }
 
-    face(x_vel, y_vel) {
+    turn(x_vel, y_vel) {
+        /**
+         * Prepares the snake to turn in a certain direction. Prevents the snake from turning
+         * backwards if its body is longer than one unit.
+         * @param {number} x_vel 1,0, or -1
+         * @param {number} y_vel 1,0, or -1
+         * @return {boolean} true=respawn successful. false=there are no available points
+         */
         if (this.body.length > 1 &&
             this.body[0].x + x_vel === this.body[1].x &&
             this.body[0].y + y_vel === this.body[1].y) {
-                return false;
+            return false;
         }
+        if (!([1,0,-1].indexOf(x_vel) !== -1 && [1,0,-1].indexOf(y_vel) !== -1 &&
+            Math.abs(x_vel) + Math.abs(y_vel) === 1)) {
+            return false;
+        }
+
         this.x_vel = x_vel;
         this.y_vel = y_vel;
         return true;
@@ -50,7 +65,12 @@ class Snake {
         this.dead = true;
     }
 
+    satisfy() {
+        this.full = true;
+    }
+
     move() {
+        // Moves the snake forward in the direction it has turned in
         this.body.unshift({
             x: this.body[0].x + this.x_vel,
             y: this.body[0].y + this.y_vel
@@ -61,7 +81,7 @@ class Snake {
         }
         this.growing = false;
 
-        // check if self bite.
+        // check if the snake has collided with itself
         let selfBite = this.body.slice(1).some(
             point => point.x === snakeHead.x && point.y === snakeHead.y
         );
