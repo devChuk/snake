@@ -40,7 +40,7 @@ class Snake {
          * backwards if its body is longer than one unit.
          * @param {number} x_vel 1,0, or -1
          * @param {number} y_vel 1,0, or -1
-         * @return {boolean} true=respawn successful. false=there are no available points
+         * @return {boolean} true=turning successful. false=turning unsuccessful
          */
         if (this.body.length > 1 &&
             this.body[0].x + x_vel === this.body[1].x &&
