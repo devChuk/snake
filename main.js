@@ -121,6 +121,21 @@ function setUpGameAndEventListeners() {
                 break;
         }
     });
+
+    document.addEventListener('touchstart', (event) => {
+        event.preventDefault();
+        let x = event.touches[0].clientX - window.innerWidth / 2;
+        let y = event.touches[0].clientY - window.innerHeight / 2;
+        if (y > x && y < -x) {
+            snake.turn(-1, 0);
+        } else if (y < x && y < -x) {
+            snake.turn(0, -1);
+        } else if (y < x && y > -x) {
+            snake.turn(1, 0);
+        } else if (y > x && y > -x) {
+            snake.turn(0, 1);
+        }
+    });
 }
 
 setUpGameAndEventListeners();
